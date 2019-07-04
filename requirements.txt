@@ -1,0 +1,8 @@
+h5py==2.7.1
+Pillow==6.0.0
+scipy==1.0.1
+sk-video==1.1.10
+tensorboardX==1.2
+tensorflow-gpu==1.0.0
+torch==1.1.0
+torchvision==0.3.0
