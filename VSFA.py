@@ -258,7 +258,7 @@ if __name__ == "__main__":
             print("EXP ID={}: Update best model using best_val_criterion in epoch {}".format(args.exp_id, epoch))
             print("Val results: val loss={:.4f}, SROCC={:.4f}, KROCC={:.4f}, PLCC={:.4f}, RMSE={:.4f}"
                   .format(val_loss, val_SROCC, val_KROCC, val_PLCC, val_RMSE))
-            if args.test_ratio > 0 and args.notest_during_training:
+            if args.test_ratio > 0 and not args.notest_during_training:
                 print("Test results: test loss={:.4f}, SROCC={:.4f}, KROCC={:.4f}, PLCC={:.4f}, RMSE={:.4f}"
                       .format(test_loss, SROCC, KROCC, PLCC, RMSE))
                 np.save(save_result_file, (y_pred, y_test, test_loss, SROCC, KROCC, PLCC, RMSE, test_index))
