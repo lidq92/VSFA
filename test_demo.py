@@ -12,6 +12,7 @@ import numpy as np
 from VSFA import VSFA
 from CNNfeatures import get_features
 from argparse import ArgumentParser
+import time
 
 
 if __name__ == "__main__":
@@ -33,10 +34,12 @@ if __name__ == "__main__":
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    start = time.time()
+
     # data preparation
     assert args.video_format == 'YUV420' or args.video_format == 'RGB'
     if args.video_format == 'YUV420':
-        video_data = skvideo.io.vread(args.video_path, args.height, args.width, inputdict={'-pix_fmt': 'yuvj420p'})
+        video_data = skvideo.io.vread(args.video_path, args.video_height, args.video_width, inputdict={'-pix_fmt': 'yuvj420p'})
     else:
         video_data = skvideo.io.vread(args.video_path)
 
@@ -72,3 +75,7 @@ if __name__ == "__main__":
         outputs = model(features, input_length)
         y_pred = outputs[0][0].to('cpu').numpy()
         print("Predicted quality: {}".format(y_pred))
+
+    end = time.time()
+
+    print('Time: {} s'.format(end-start)
