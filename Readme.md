@@ -12,7 +12,9 @@ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 - TensorboardX 1.2, TensorFlow-TensorBoard
 - [pytorch/ignite](https://github.com/pytorch/ignite)
 
-### Feature Extraction
+
+### Intra-Database Experiments (Training and Evaluating)
+#### Feature extraction
 
 ```
 CUDA_VISIBLE_DEVICES=0 python CNNfeatures.py --database=KoNViD-1k --frame_batch_size=64
@@ -20,8 +22,7 @@ CUDA_VISIBLE_DEVICES=0 python CNNfeatures.py --database=KoNViD-1k --frame_batch_
 
 You need to specify the `database` and change the corresponding `videos_dir`.
 
-### Quality Prediction
-#### intra-database experiments
+#### Quality prediction
 
 ```
 CUDA_VISIBLE_DEVICES=0 python VSFA.py --database=KoNViD-1k --exp_id=0
@@ -29,7 +30,7 @@ CUDA_VISIBLE_DEVICES=0 python VSFA.py --database=KoNViD-1k --exp_id=0
 
 You need to specify the `database` and `exp_id`.
 
-#### test demo
+### Test Demo
 
 ```
 python test_demo.py --video_path=test.mp4
