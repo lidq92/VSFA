@@ -78,4 +78,4 @@ if __name__ == "__main__":
 
     end = time.time()
 
-    print('Time: {} s'.format(end-start)
+    print('Time: {} s'.format(end-start))
