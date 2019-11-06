@@ -1,3 +1,8 @@
+% https://www.mathworks.com/help/matlab/ref/save.html
+% save your mat file with v7.3
+% To view or set the default version for MAT-files, go to the Home tab and in the Environment section, click  Preferences. 
+% Select MATLAB > General > MAT-Files and then choose a MAT-file save format option.
+
 clear,clc;
 
 %% KoNViD-1k
@@ -15,7 +20,7 @@ ref_ids = [1:length(scores)]'; % video content ids
 % `random` train-val-test split index, 1000 runs
 index = cell2mat(arrayfun(@(i)randperm(length(scores)), ...
     1:1000,'UniformOutput', false)'); 
-save('KoNViD-1kinfo')
+save('KoNViD-1kinfo','-v7.3')
 
 %% CVD2014
 data_path = '/media/ldq/Research/Data/CVD2014/CVD2014_ratings/Realignment_MOS.csv';
@@ -34,7 +39,7 @@ ref_ids = [1:length(scores)]';
 % `random` train-val-test split index, 1000 runs
 index = cell2mat(arrayfun(@(i)randperm(length(scores)), ...
     1:1000,'UniformOutput', false)'); 
-save('CVD2014info')
+save('CVD2014info','-v7.3')
 % LIVE-Qualcomm
 data_path = '/media/ldq/Others/Data/12.LIVE-Qualcomm Mobile In-Capture Video Quality Database/qualcommSubjectiveData.mat';
 data = load(data_path);
@@ -53,4 +58,4 @@ ref_ids = [1:length(scores)]';
 % `random` train-val-test split index, 1000 runs
 index = cell2mat(arrayfun(@(i)randperm(length(scores)), ...
     1:1000,'UniformOutput', false)'); 
-save('LIVE-Qualcomminfo')
+save('LIVE-Qualcomminfo','-v7.3')
