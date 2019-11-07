@@ -97,19 +97,21 @@ def get_features(video_data, frame_batch_size=64, device='cuda'):
     frame_end = frame_start + frame_batch_size
     output1 = torch.Tensor().to(device)
     output2 = torch.Tensor().to(device)
-    while frame_end < video_length:
-        batch = video_data[frame_start:frame_end].to(device)
-        features_mean, features_std = extractor(batch)
-        output1 = torch.cat((output1, features_mean), 0)
-        output2 = torch.cat((output2, features_std), 0)
-        frame_end += frame_batch_size
-        frame_start += frame_batch_size
+    extractor.eval()
+    with torch.no_grad():
+	    while frame_end < video_length:
+	        batch = video_data[frame_start:frame_end].to(device)
+	        features_mean, features_std = extractor(batch)
+	        output1 = torch.cat((output1, features_mean), 0)
+	        output2 = torch.cat((output2, features_std), 0)
+	        frame_end += frame_batch_size
+	        frame_start += frame_batch_size
 
-    last_batch = video_data[frame_start:video_length].to(device)
-    features_mean, features_std = extractor(last_batch)
-    output1 = torch.cat((output1, features_mean), 0)
-    output2 = torch.cat((output2, features_std), 0)
-    output = torch.cat((output1, output2), 1).squeeze()
+	    last_batch = video_data[frame_start:video_length].to(device)
+	    features_mean, features_std = extractor(last_batch)
+	    output1 = torch.cat((output1, features_mean), 0)
+	    output2 = torch.cat((output2, features_std), 0)
+	    output = torch.cat((output1, output2), 1).squeeze()
 
     return output
 
