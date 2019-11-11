@@ -33,7 +33,8 @@ We set seeds for the random generators and re-run the experiments on the same te
 (The results may be still not the same among different version of PyTorch. See [randomness@Pytorch Docs](https://pytorch.org/docs/stable/notes/randomness.html))
 
 The reproduced overall results are better than the previous results published in the paper.
-We set better hyper-parameters based on the training loss curve and the validation results.
+We add learning rate scheduling in the updated code.
+Better hyper-parameters may be set, if you "look" at the training loss curve and the curves of validation results.
 
 The mean (std) values of the first ten index splits (60%:20%:20% train:val:test)
 
