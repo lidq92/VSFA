@@ -16,6 +16,7 @@ from PIL import Image
 import os
 import h5py
 import numpy as np
+import random
 from argparse import ArgumentParser
 
 
@@ -127,6 +128,14 @@ if __name__ == "__main__":
                         help='flag whether to disable GPU')
     args = parser.parse_args()
 
+    torch.manual_seed(args.seed)  #
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    np.random.seed(args.seed)
+    random.seed(args.seed)
+
+    torch.utils.backcompat.broadcast_warning.enabled = True
+
     if args.database == 'KoNViD-1k':
         videos_dir = '/home/ldq/Downloads/KoNViD-1k/'  # videos dir
         features_dir = 'CNN_features_KoNViD-1k/'  # features dir
@@ -145,10 +154,10 @@ if __name__ == "__main__":
 
     device = torch.device("cuda" if not args.disable_gpu and torch.cuda.is_available() else "cpu")
 
-    Info = h5py.File(datainfo)
-    video_names = [Info[Info['video_names'][0, :][i]].value.tobytes()[::2].decode() for i in range(len(Info['video_names'][0, :]))]
+    Info = h5py.File(datainfo, 'r')
+    video_names = [Info[Info['video_names'][0, :][i]][()].tobytes()[::2].decode() for i in range(len(Info['video_names'][0, :]))]
     scores = Info['scores'][0, :]
-    video_format = Info['video_format'].value.tobytes()[::2].decode()
+    video_format = Info['video_format'][()].tobytes()[::2].decode()
     width = int(Info['width'][0])
     height = int(Info['height'][0])
     dataset = VideoDataset(videos_dir, video_names, scores, video_format, width, height)
