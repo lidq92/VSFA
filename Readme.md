@@ -24,7 +24,7 @@ You need to specify the `database` and `exp_id`.
 
 #### Visualization
 ```bash
-tensorboard --logdir=tensorboard_logs --port=6006 # in the server (host:port)
+tensorboard --logdir=logs --port=6006 # in the server (host:port)
 ssh -p port -L 6006:localhost:6006 user@host # in your PC. See the visualization in your PC
 ```
 
