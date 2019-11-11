@@ -2,22 +2,24 @@
 #
 # Author: Dingquan Li
 # Email: dingquanli AT pku DOT edu DOT cn
-# Date: 2018/3/27
+# Date: 2019/11/8
 #
-# source activate ~/anaconda3/envs/research/
 # tensorboard --logdir=logs --port=6006
 # CUDA_VISIBLE_DEVICES=1 python VSFA.py --database=KoNViD-1k --exp_id=0
 
+from argparse import ArgumentParser
 import os
 import h5py
 import torch
+from torch.optim import Adam, lr_scheduler
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset
 import numpy as np
+import random
 from scipy import stats
 from tensorboardX import SummaryWriter
-from argparse import ArgumentParser
+import datetime
 
 
 class VQADataset(Dataset):
@@ -38,7 +40,7 @@ class VQADataset(Dataset):
         return len(self.mos)
 
     def __getitem__(self, idx):
-        sample = (self.features[idx], self.length[idx], self.label[idx])
+        sample = self.features[idx], self.length[idx], self.label[idx]
         return sample
 
 
@@ -96,15 +98,16 @@ class VSFA(nn.Module):
 
 if __name__ == "__main__":
     parser = ArgumentParser(description='"VSFA: Quality Assessment of In-the-Wild Videos')
+    parser.add_argument("--seed", type=int, default=19920517)
     parser.add_argument('--lr', type=float, default=0.00001,
                         help='learning rate (default: 0.00001)')
     parser.add_argument('--batch_size', type=int, default=16,
                         help='input batch size for training (default: 16)')
-    parser.add_argument('--epochs', type=int, default=3000,
-                        help='number of epochs to train (default: 3000)')
+    parser.add_argument('--epochs', type=int, default=2000,
+                        help='number of epochs to train (default: 2000)')
 
-    parser.add_argument('--database', default='KoNViD-1k', type=str,
-                        help='database name (default: KoNViD-1k)')
+    parser.add_argument('--database', default='CVD2014', type=str,
+                        help='database name (default: CVD2014)')
     parser.add_argument('--model', default='VSFA', type=str,
                         help='model name (default: VSFA)')
     parser.add_argument('--exp_id', default=0, type=int,
@@ -127,6 +130,17 @@ if __name__ == "__main__":
                         help='flag whether to disable GPU')
     args = parser.parse_args()
 
+    args.decay_interval = int(args.epochs/10)
+    args.decay_ratio = 0.8
+
+    torch.manual_seed(args.seed)  #
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    np.random.seed(args.seed)
+    random.seed(args.seed)
+
+    torch.utils.backcompat.broadcast_warning.enabled = True
+
     if args.database == 'KoNViD-1k':
         features_dir = 'CNN_features_KoNViD-1k/'  # features dir
         datainfo = 'data/KoNViD-1kinfo.mat'  # database info: video_names, scores; video format, width, height, index, ref_ids, max_len, etc.
@@ -136,7 +150,6 @@ if __name__ == "__main__":
     if args.database == 'LIVE-Qualcomm':
         features_dir = 'CNN_features_LIVE-Qualcomm/'
         datainfo = 'data/LIVE-Qualcomminfo.mat'
-        args.epochs = 15000  # need more training to converge
 
     print('EXP ID: {}'.format(args.exp_id))
     print(args.database)
@@ -144,7 +157,7 @@ if __name__ == "__main__":
 
     device = torch.device("cuda" if not args.disable_gpu and torch.cuda.is_available() else "cpu")
 
-    Info = h5py.File(datainfo)  # index, ref_ids
+    Info = h5py.File(datainfo, 'r')  # index, ref_ids
     index = Info['index']
     index = index[:, args.exp_id % index.shape[1]]  # np.random.permutation(N)
     ref_ids = Info['ref_ids'][0, :]  #
@@ -176,10 +189,14 @@ if __name__ == "__main__":
     save_result_file = 'results/{}-{}-EXP{}'.format(args.model, args.database, args.exp_id)
 
     if not args.disable_visualization:  # Tensorboard Visualization
-        writer = SummaryWriter(log_dir='{}/EXP{}-{}-{}'.format(args.log_dir, args.exp_id, args.database, args.model))
+        writer = SummaryWriter(log_dir='{}/EXP{}-{}-{}-{}-{}-{}-{}'
+                               .format(args.log_dir, args.exp_id, args.database, args.model,
+                                       args.lr, args.batch_size, args.epochs,
+                                       datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")))
 
     criterion = nn.L1Loss()  # L1 loss
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    optimizer = Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=args.decay_interval, gamma=args.decay_ratio)
     best_val_criterion = -1  # SROCC min
     for epoch in range(args.epochs):
         # Train
@@ -203,11 +220,11 @@ if __name__ == "__main__":
         L = 0
         with torch.no_grad():
             for i, (features, length, label) in enumerate(val_loader):
-                y_val[i] = scale * label.numpy()  #
+                y_val[i] = scale * label.item()  #
                 features = features.to(device).float()
                 label = label.to(device).float()
                 outputs = model(features, length.float())
-                y_pred[i] = scale * outputs[0].to('cpu').numpy()
+                y_pred[i] = scale * outputs.item()
                 loss = criterion(outputs, label)
                 L = L + loss.item()
         val_loss = L / (i + 1)
@@ -223,11 +240,11 @@ if __name__ == "__main__":
             L = 0
             with torch.no_grad():
                 for i, (features, length, label) in enumerate(test_loader):
-                    y_test[i] = scale * label.numpy()  #
+                    y_test[i] = scale * label.item()  #
                     features = features.to(device).float()
                     label = label.to(device).float()
                     outputs = model(features, length.float())
-                    y_pred[i] = scale * outputs[0].to('cpu').numpy()
+                    y_pred[i] = scale * outputs.item()
                     loss = criterion(outputs, label)
                     L = L + loss.item()
             test_loss = L / (i + 1)
@@ -251,10 +268,7 @@ if __name__ == "__main__":
                 writer.add_scalar("RMSE/test", RMSE, epoch)  #
 
         # Update the model with the best val_SROCC
-        # when epoch is larger than args.epochs/6
-        # This is to avoid the situation that the model will not be updated
-        # due to the impact of randomly initializations of the networks
-        if val_SROCC > best_val_criterion and epoch > args.epochs / 6:
+        if val_SROCC > best_val_criterion:
             print("EXP ID={}: Update best model using best_val_criterion in epoch {}".format(args.exp_id, epoch))
             print("Val results: val loss={:.4f}, SROCC={:.4f}, KROCC={:.4f}, PLCC={:.4f}, RMSE={:.4f}"
                   .format(val_loss, val_SROCC, val_KROCC, val_PLCC, val_RMSE))
@@ -274,11 +288,11 @@ if __name__ == "__main__":
             y_test = np.zeros(len(test_index))
             L = 0
             for i, (features, length, label) in enumerate(test_loader):
-                y_test[i] = scale * label.numpy()  #
+                y_test[i] = scale * label.item()  #
                 features = features.to(device).float()
                 label = label.to(device).float()
                 outputs = model(features, length.float())
-                y_pred[i] = scale * outputs[0].to('cpu').numpy()
+                y_pred[i] = scale * outputs.item()
                 loss = criterion(outputs, label)
                 L = L + loss.item()
         test_loss = L / (i + 1)
