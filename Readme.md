@@ -29,7 +29,7 @@ ssh -p port -L 6006:localhost:6006 user@host # in your PC. See the visualization
 ```
 
 #### Reproduced results
-We set seed for the random generators and re-run the experiments on the same ten splits.
+We set seeds for the random generators and re-run the experiments on the same ten splits.
 (The results may be still not the same among different version of PyTorch. See [randomness@Pytorch Docs](https://pytorch.org/docs/stable/notes/randomness.html))
 
 The reproduced overall results are better than the previous results published in the paper.
@@ -46,7 +46,7 @@ The mean (std) values of the first ten index splits (60%:20%:20% train:val:test)
 
 ### Test Demo
 
-The model weights provided in `models/VSFA.pt` is the saved weights when running the 9-th split of KoNViD-1k.
+The model weights provided in `models/VSFA.pt` are the saved weights when running the 9-th split of KoNViD-1k.
 ```
 python test_demo.py --video_path=test.mp4
 ```
@@ -61,6 +61,8 @@ source deactive
 - PyTorch 1.1.0
 - TensorboardX 1.2, TensorFlow-TensorBoard
 - [pytorch/ignite](https://github.com/pytorch/ignite)
+
+Note: The codes can also be directly run on PyTorch 1.3.
 
 ### Contact
 Dingquan Li, dingquanli AT pku DOT edu DOT cn.
