@@ -1,4 +1,6 @@
 # Quality Assessment of In-the-Wild Videos
+[![License](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](License)
+
 ## Description
 VSFA code for the following papers:
 
