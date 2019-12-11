@@ -119,6 +119,7 @@ def get_features(video_data, frame_batch_size=64, device='cuda'):
 
 if __name__ == "__main__":
     parser = ArgumentParser(description='"Extracting Content-Aware Perceptual Features using Pre-Trained ResNet-50')
+    parser.add_argument("--seed", type=int, default=19920517)
     parser.add_argument('--database', default='KoNViD-1k', type=str,
                         help='database name (default: KoNViD-1k)')
     parser.add_argument('--frame_batch_size', type=int, default=64,

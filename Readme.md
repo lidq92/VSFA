@@ -63,7 +63,6 @@ source deactive
 ```
 - PyTorch 1.1.0
 - TensorboardX 1.2, TensorFlow-TensorBoard
-- [pytorch/ignite](https://github.com/pytorch/ignite)
 
 Note: The codes can also be directly run on PyTorch 1.3.
 
