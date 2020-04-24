@@ -31,8 +31,7 @@ ssh -p port -L 6006:localhost:6006 user@host # in your PC. See the visualization
 ```
 
 #### Reproduced results
-We set seeds for the random generators and re-run the experiments on the same ten splits.
-(The results may be still not the same among different version of PyTorch. See [randomness@Pytorch Docs](https://pytorch.org/docs/stable/notes/randomness.html))
+We set seeds for the random generators and re-run the experiments on the same ten splits, i.e., the first 10 splits (`exp_id=0~9`). The results may be still not the same among different version of PyTorch. See [randomness@Pytorch Docs](https://pytorch.org/docs/stable/notes/randomness.html)
 
 The reproduced overall results are better than the previous results published in the paper.
 We add learning rate scheduling in the updated code.
