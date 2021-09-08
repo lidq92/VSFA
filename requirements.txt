@@ -1,7 +1,7 @@
 argparse==1.4.0
 h5py==2.10.0
 PyYAML==5.1.2
-Pillow==6.2.1
+Pillow==8.3.2
 scikit-video==1.1.11
 numpy==1.17.3
 scipy==1.0.1
